@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     stages {
-        stage('Parando y eliminando servicios anteriores...') {
+        // Parar los servicios que ya existen o en todo caso hacer caso omiso
+        stage('Parando los servicios...') {
             steps {
                 bat '''
                     docker compose -p exu2-jgml down || exit /b 0
@@ -10,6 +11,7 @@ pipeline {
             }
         }
 
+        // Eliminar las imágenes creadas por ese proyecto
         stage('Eliminando imágenes anteriores...') {
             steps {
                 bat '''
@@ -25,17 +27,18 @@ pipeline {
             }
         }
 
+        // Del recurso SCM configurado en el job, jala el repo
         stage('Obteniendo actualización...') {
             steps {
                 checkout scm
             }
         }
 
+        // Construir y levantar los servicios
         stage('Construyendo y desplegando servicios...') {
             steps {
                 bat '''
-                    docker compose -p exu2-jgml build --no-cache
-                    docker compose -p exu2-jgml up -d
+                    docker compose up --build -d
                 '''
             }
         }
