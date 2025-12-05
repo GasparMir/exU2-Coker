@@ -1,45 +1,61 @@
-// Pipeline para construir y desplegar la aplicación usando Docker Compose
 pipeline {
     agent any
 
     environment {
-        // Nombre del proyecto/stack de Docker Compose (requerido)
-        COMPOSE_PROJECT_NAME = 'exu2-jgm'
-        // Etiqueta de la imagen (requerida)
-        IMAGE_TAG = 'v1.0.2'
+        COMPOSE_PROJECT_NAME = 'exu2-jgml'
+
     }
 
     stages {
-        stage('Checkout') {
+        stage('Parando y eliminando servicios anteriores...') {
             steps {
-                // Obtener el código del repositorio (requiere que el job esté configurado con SCM)
+                bat '''
+                    docker compose -p %COMPOSE_PROJECT_NAME% down || exit /b 0
+                '''
+            }
+        }
+
+        stage('Eliminando imágenes anteriores...') {
+            steps {
+                bat '''
+                    for /f "tokens=*" %%i in ('docker images --filter "label=com.docker.compose.project=%COMPOSE_PROJECT_NAME%" -q') do (
+                        docker rmi -f %%i
+                    )
+                    if errorlevel 1 (
+                        echo No hay imagenes por eliminar
+                    ) else (
+                        echo Imagenes eliminadas correctamente
+                    )
+                '''
+            }
+        }
+
+        stage('Obteniendo actualización...') {
+            steps {
                 checkout scm
             }
         }
 
-        stage('Build Docker Images') {
+        stage('Construyendo y desplegando servicios...') {
             steps {
-                script {
-                    echo "Building client image..."
-                    // Construir la imagen del cliente sin cache
-                    sh "docker build --no-cache -t client:${IMAGE_TAG} ./client"
-                    
-                    echo "Building operations image..."
-                    // Construir la imagen del servidor sin cache
-                    sh "docker build --no-cache -t operations:${IMAGE_TAG} ./server"
-                }
+                bat '''
+                    docker compose -p %COMPOSE_PROJECT_NAME% up --build -d
+                '''
             }
         }
+    }
 
-        stage('Deploy to Docker') {
-            steps {
-                script {
-                    echo "Deploying stack with name: ${COMPOSE_PROJECT_NAME}"
-                    // Levantar los servicios con el archivo docker-compose.yml
-                    // Se usa el nombre del proyecto definido en el environment
-                    sh "docker compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose.yml up --build -d"
-                }
-            }
+    post {
+        success {
+            echo 'Pipeline ejecutado con éxito'
+        }
+
+        failure {
+            echo 'Hubo un error al ejecutar el pipeline'
+        }
+
+        always {
+            echo 'Pipeline finalizado'
         }
     }
 }
