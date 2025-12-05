@@ -1,16 +1,61 @@
-FROM node:20-alpine AS build
+pipeline {
+    agent any
 
-WORKDIR /app
+    environment {
+        COMPOSE_PROJECT_NAME = 'exu2-jgml'
 
-COPY package*.json .
+    }
 
-RUN npm install
+    stages {
+        stage('Parando y eliminando servicios anteriores...') {
+            steps {
+                bat '''
+                    docker compose -p %COMPOSE_PROJECT_NAME% down || exit /b 0
+                '''
+            }
+        }
 
-COPY . .
+        stage('Eliminando imágenes anteriores...') {
+            steps {
+                bat '''
+                    for /f "tokens=*" %%i in ('docker images --filter "label=com.docker.compose.project=%COMPOSE_PROJECT_NAME%" -q') do (
+                        docker rmi -f %%i
+                    )
+                    if errorlevel 1 (
+                        echo No hay imagenes por eliminar
+                    ) else (
+                        echo Imagenes eliminadas correctamente
+                    )
+                '''
+            }
+        }
 
-RUN npm run build
+        stage('Obteniendo actualización...') {
+            steps {
+                checkout scm
+            }
+        }
 
-FROM nginx:alpine
+        stage('Construyendo y desplegando servicios...') {
+            steps {
+                bat '''
+                    docker compose -p %COMPOSE_PROJECT_NAME% up --build -d
+                '''
+            }
+        }
+    }
 
-RUN rm -rf /usr/share/nginx/html/*
+    post {
+        success {
+            echo 'Pipeline ejecutado con éxito'
+        }
 
+        failure {
+            echo 'Hubo un error al ejecutar el pipeline'
+        }
+
+        always {
+            echo 'Pipeline finalizado'
+        }
+    }
+}

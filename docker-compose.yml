@@ -1,6 +1,6 @@
 version: '3.8'
 
-name: exu2-jgm
+name: exu2-jgml
 
 services:
   operations:
@@ -12,7 +12,7 @@ services:
     ports:
       - "8086:8080"
     networks:
-      - exu2-jgm-net
+      - exu2-jgml-net
 
   client:
     container_name: exu2-cliente
@@ -23,9 +23,9 @@ services:
     ports:
       - "5173:80"
     networks:
-      - exu2-jgm-net
+      - exu2-jgml-net
     restart: always
 
 networks:
-  exu2-jgm-net:
+  exu2-jgml-net:
     driver: bridge

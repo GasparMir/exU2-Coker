@@ -1,11 +1,16 @@
-# Crea la imagen a partir de un nginx de alpine
+# ETAPA 1: BUILD
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json .
+RUN npm install
+COPY . .
+RUN npm run build
+
+# --- ETAPA 2: PRODUCTION (Nginx) ---
 FROM nginx:alpine
 
-# Elimina todos los archivos por defecto que tiene la imagen
+RUN rm -rf /etc/nginx/conf.d/* # Copia tu archivo nginx.conf (ya simplificado)
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf 
 RUN rm -rf /usr/share/nginx/html/*
-
-# Copia mi proyecto en la carpeta compartida de nginx
-COPY . /usr/share/nginx/html
-
-# Expon la imagen en puerto 80
+COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
