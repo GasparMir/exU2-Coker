@@ -34,8 +34,8 @@ pipeline {
         stage('Construyendo y desplegando servicios...') {
             steps {
                 bat '''
-                    docker compose -p exu2-jgml up --build -d
-                '''
+                    docker compose -p exu2-jgml up --build -d --force-recreate
+                    '''
             }
         }
     }
