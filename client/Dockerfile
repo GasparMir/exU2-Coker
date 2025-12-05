@@ -1,4 +1,4 @@
-# Etapa 1: Recursos (Construcción de la aplicación React/Vite)
+# Etapa 1: BUILD
 FROM node:20 AS build
 WORKDIR /app
 
@@ -7,24 +7,17 @@ RUN npm install
 
 COPY . .
 
-
-
-ARG API_HOST
-ARG API_PORT
-ARG API_BASE
-ARG API_PROTOCOL
-
-ENV VITE_API_HOST=$API_HOST
-ENV VITE_API_PORT=$API_PORT
-ENV VITE_API_BASE=$API_BASE
-ENV VITE_API_PROTOCOL=$API_PROTOCOL
-
+# Comando de compilación
 RUN npm run build
 
-# Etapa 2: Imagen (Servir con Nginx)
+# Etapa 2: PRODUCTION (Nginx)
 FROM nginx:alpine
 
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copia la configuración de Nginx (requerida para SPA)
 COPY ./nginx.conf /etc/nginx/nginx.conf 
+
+# Copia los archivos estáticos compilados (desde la etapa 'build')
+COPY --from=build /app/dist /usr/share/nginx/html
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
