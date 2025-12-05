@@ -34,8 +34,9 @@ pipeline {
         stage('Construyendo y desplegando servicios...') {
             steps {
                 bat '''
-                    docker compose -p exu2-jgml up --build -d --force-recreate
-                    '''
+                    docker compose -p exu2-jgml build --no-cache
+                    docker compose -p exu2-jgml up -d
+                '''
             }
         }
     }
