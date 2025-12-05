@@ -1,16 +1,11 @@
 pipeline {
     agent any
 
-    environment {
-        COMPOSE_PROJECT_NAME = 'exu2-jgml'
-
-    }
-
     stages {
         stage('Parando y eliminando servicios anteriores...') {
             steps {
                 bat '''
-                    docker compose -p %COMPOSE_PROJECT_NAME% down || exit /b 0
+                    docker compose -p exu2-jgml down || exit /b 0
                 '''
             }
         }
@@ -18,7 +13,7 @@ pipeline {
         stage('Eliminando imágenes anteriores...') {
             steps {
                 bat '''
-                    for /f "tokens=*" %%i in ('docker images --filter "label=com.docker.compose.project=%COMPOSE_PROJECT_NAME%" -q') do (
+                    for /f "tokens=*" %%i in ('docker images --filter "label=com.docker.compose.project=exu2-jgml" -q') do (
                         docker rmi -f %%i
                     )
                     if errorlevel 1 (
@@ -39,7 +34,7 @@ pipeline {
         stage('Construyendo y desplegando servicios...') {
             steps {
                 bat '''
-                    docker compose -p %COMPOSE_PROJECT_NAME% up --build -d
+                    docker compose -p exu2-jgml up --build -d
                 '''
             }
         }
