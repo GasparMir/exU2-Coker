@@ -1,46 +1,31 @@
 version: '3.8'
 
-# Nombre del proyecto (compose-stack) requerido: exu2-[tus iniciales]
 name: exu2-jgm
 
 services:
-  # Servicio del Backend
   operations:
-    # Nombre del contenedor requerido
     container_name: exu2-operaciones
-    # Construir desde el contexto del directorio 'server'
     build:
       context: ./server
       dockerfile: Dockerfile
-    # Nombre de la imagen y tag requerido
     image: operations:v1.0.2
-    # Mapeo de puertos: PUERTO_PC:PUERTO_CONTENEDOR (8086:8080)
     ports:
       - "8086:8080"
-    # Unirse a la red requerida
     networks:
       - exu2-jgm-net
 
-  # Servicio del Frontend
   client:
-    # Nombre del contenedor requerido
     container_name: exu2-cliente
-    # Construir desde el contexto del directorio 'client'
     build:
       context: ./client
       dockerfile: Dockerfile
-    # Nombre de la imagen y tag requerido
     image: client:v1.0.2
-    # Mapeo de puertos: PUERTO_PC:PUERTO_CONTENEDOR (5173:80)
     ports:
       - "5173:80"
-    # Unirse a la red requerida
     networks:
       - exu2-jgm-net
     restart: always
 
-# Definición de la red
 networks:
-  # Nombre de la red requerido: exu2-[tus iniciales]-net
   exu2-jgm-net:
     driver: bridge
