@@ -6,7 +6,7 @@ pipeline {
         stage('Parando los servicios...') {
             steps {
                 bat '''
-                    docker compose -p exu2-jgml down || exit /b 0
+                    docker compose -p i2ex-jgml down || exit /b 0
                 '''
             }
         }
@@ -15,7 +15,7 @@ pipeline {
         stage('Eliminando imágenes anteriores...') {
             steps {
                 bat '''
-                    for /f "tokens=*" %%i in ('docker images --filter "label=com.docker.compose.project=exu2-jgml" -q') do (
+                    for /f "tokens=*" %%i in ('docker images --filter "label=com.docker.compose.project=i2ex-jgml" -q') do (
                         docker rmi -f %%i
                     )
                     if errorlevel 1 (

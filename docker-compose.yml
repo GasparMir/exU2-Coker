@@ -1,29 +1,29 @@
-name: exu2-jgml
+name: i2ex-jgml
 
 services:
   operations:
-    container_name: exu2-operaciones
+    container_name: servicio_descuentos
     build:
       context: ./server
       dockerfile: Dockerfile
-    image: operations:v1.0.2
+    image: calculator:latest-v4
     ports:
-      - "8086:8080"
+      - "8081:8080"
     networks:
-      - exu2-jgml-net
+      - i2ex-jgml-net
 
   client:
-    container_name: exu2-cliente
+    container_name: cliente_descuentos
     build:
       context: ./client
       dockerfile: Dockerfile
-    image: client:v1.0.2
+    image: client:latest-v4
     ports:
-      - "5173:80"
+      - "3000:80"
     networks:
-      - exu2-jgml-net
+      - i2ex-jgml-net
     restart: always
 
 networks:
-  exu2-jgml-net:
+  i2ex-jgml-net:
     driver: bridge
